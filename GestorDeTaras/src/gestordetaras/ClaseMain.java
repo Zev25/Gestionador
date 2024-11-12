@@ -1,13 +1,13 @@
 package gestordetaras;
 
-import vista.InterfazUsuario;
+import vista.MenuInicial;
 /**
  *
  * @author Felipe
  */
 public class ClaseMain {
     public static void main(String[] args) {
-        InterfazUsuario.main(args);
+        MenuInicial.main(args);
     }
     
 }

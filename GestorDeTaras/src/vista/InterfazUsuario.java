@@ -10,44 +10,48 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.net.URI;
-import java.util.Date;
+import java.text.SimpleDateFormat;
+
+/**
+ *
+ * @author Felipe
+ */
 
 public class InterfazUsuario extends JFrame {
     private GestorDeTarea gestor;
-    private DefaultListModel<Tarea> modeloLista;
-    private JList<Tarea> listView;
+    private TaskTableModel tableModel;
+    private JTable taskTable;
     private JTextField nombreField;
     private JTextField fechaInicioField;
     private JTextField fechaFinField;
     private JTextField categoriaField;
     private JTextField enlaceField;
     private JTextField prioridadField;
+    private SimpleDateFormat dateFormat;
 
     public InterfazUsuario() {
         gestor = new GestorDeTarea();
         gestor.cargarTarea();
+        dateFormat = new SimpleDateFormat("dd/MM/yyyy");
 
         setTitle("Gestor de Tareas");
-        setSize(400, 600);
+        setSize(800, 500);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 
-        modeloLista = new DefaultListModel<>();
-        listView = new JList<>(modeloLista);
-        listView.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        listView.setVisibleRowCount(-1);
-        JScrollPane listScroller = new JScrollPane(listView);
+        tableModel = new TaskTableModel();
+        taskTable = new JTable(tableModel);
+        taskTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        JScrollPane scrollPane = new JScrollPane(taskTable);
 
-        for (Tarea tarea : gestor.getListaTarea()) {
-            modeloLista.addElement(tarea);
-        }
+        tableModel.addTasks(gestor.getListaTarea());
 
-        nombreField = new JTextField();
-        fechaInicioField = new JTextField();
-        fechaFinField = new JTextField();
-        categoriaField = new JTextField();
-        enlaceField = new JTextField();
-        prioridadField = new JTextField();
+        nombreField = new JTextField(15);
+        fechaInicioField = new JTextField(15);
+        fechaFinField = new JTextField(15);
+        categoriaField = new JTextField(15);
+        enlaceField = new JTextField(15);
+        prioridadField = new JTextField(15);
 
         JButton agregarBoton = new JButton("Agregar Tarea");
         agregarBoton.addActionListener(new ActionListener() {
@@ -65,16 +69,21 @@ public class InterfazUsuario extends JFrame {
                     return;
                 }
 
-                Tarea tarea = new Tarea(
-                    nombre,
-                    new Date(fechaInicio),
-                    new Date(fechaFin),
-                    categoria,
-                    enlace,
-                    prioridad
-                );
-                gestor.agregarTarea(tarea);
-                modeloLista.addElement(tarea);
+                try {
+                    Tarea tarea = new Tarea(
+                            nombre,
+                            dateFormat.parse(fechaInicio),
+                            dateFormat.parse(fechaFin),
+                            categoria,
+                            enlace,
+                            prioridad
+                    );
+                    gestor.agregarTarea(tarea);
+                    tableModel.addTask(tarea);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    JOptionPane.showMessageDialog(null, "Error en el formato de fecha. Use dd/MM/yyyy.");
+                }
             }
         });
 
@@ -82,11 +91,13 @@ public class InterfazUsuario extends JFrame {
         editarBoton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                Tarea tareaSeleccionada = listView.getSelectedValue();
-                if (tareaSeleccionada != null) {
+                int selectedRow = taskTable.getSelectedRow();
+                if (selectedRow != -1) {
+                    Tarea tareaSeleccionada = tableModel.getTaskAt(selectedRow);
+
                     nombreField.setText(tareaSeleccionada.getNombre());
-                    fechaInicioField.setText(tareaSeleccionada.getFechaInicio().toString());
-                    fechaFinField.setText(tareaSeleccionada.getFechaFin().toString());
+                    fechaInicioField.setText(dateFormat.format(tareaSeleccionada.getFechaInicio()));
+                    fechaFinField.setText(dateFormat.format(tareaSeleccionada.getFechaFin()));
                     categoriaField.setText(tareaSeleccionada.getCategoria());
                     enlaceField.setText(tareaSeleccionada.getEnlaceArchivo());
                     prioridadField.setText(tareaSeleccionada.getPrioridad());
@@ -95,18 +106,27 @@ public class InterfazUsuario extends JFrame {
                     agregarBoton.addActionListener(new ActionListener() {
                         @Override
                         public void actionPerformed(ActionEvent e) {
-                            tareaSeleccionada.setNombre(nombreField.getText());
-                            tareaSeleccionada.setFechaInicio(new Date(fechaInicioField.getText()));
-                            tareaSeleccionada.setFechaFin(new Date(fechaFinField.getText()));
-                            tareaSeleccionada.setCategoria(categoriaField.getText());
-                            tareaSeleccionada.setEnlaceArchivo(enlaceField.getText());
-                            tareaSeleccionada.setPrioridad(prioridadField.getText());
+                            try {
+                                tareaSeleccionada.setNombre(nombreField.getText());
+                                tareaSeleccionada.setFechaInicio(dateFormat.parse(fechaInicioField.getText()));
+                                tareaSeleccionada.setFechaFin(dateFormat.parse(fechaFinField.getText()));
+                                tareaSeleccionada.setCategoria(categoriaField.getText());
+                                tareaSeleccionada.setEnlaceArchivo(enlaceField.getText());
+                                tareaSeleccionada.setPrioridad(prioridadField.getText());
 
-                            gestor.guardarTarea();
-                            listView.repaint();
-
-                            agregarBoton.setText("Agregar Tarea");
-                            agregarBoton.addActionListener(this);
+                                gestor.guardarTarea();
+                                tableModel.updateTask(selectedRow, tareaSeleccionada);
+                                agregarBoton.setText("Agregar Tarea");
+                                agregarBoton.addActionListener(new ActionListener() {
+                                    @Override
+                                    public void actionPerformed(ActionEvent e) {
+                                        agregarTarea();
+                                    }
+                                });
+                            } catch (Exception ex) {
+                                ex.printStackTrace();
+                                JOptionPane.showMessageDialog(null, "Error en el formato de fecha. Use dd/MM/yyyy.");
+                            }
                         }
                     });
                 } else {
@@ -119,25 +139,26 @@ public class InterfazUsuario extends JFrame {
         eliminarBoton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                Tarea tareaSeleccionada = listView.getSelectedValue();
-                if (tareaSeleccionada != null) {
-                    gestor.eliminarTarea(tareaSeleccionada);
-                    modeloLista.removeElement(tareaSeleccionada);
+                int selectedRow = taskTable.getSelectedRow();
+                if (selectedRow != -1) {
+                    gestor.eliminarTarea(tableModel.getTaskAt(selectedRow));
+                    tableModel.removeTask(selectedRow);
                 } else {
                     JOptionPane.showMessageDialog(null, "Por favor selecciona una tarea para eliminar.");
                 }
             }
         });
 
-        listView.addMouseListener(new MouseAdapter() {
+        taskTable.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent evt) {
                 if (evt.getClickCount() == 2) {
-                    Tarea tareaSeleccionada = listView.getSelectedValue();
-                    if (tareaSeleccionada != null) {
+                    int selectedRow = taskTable.getSelectedRow();
+                    if (selectedRow != -1) {
+                        Tarea tareaSeleccionada = tableModel.getTaskAt(selectedRow);
                         try {
                             Desktop.getDesktop().browse(new URI(tareaSeleccionada.getEnlaceArchivo()));
-                        } catch (Exception e) {
-                            e.printStackTrace();
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
                         }
                     }
                 }
@@ -145,33 +166,63 @@ public class InterfazUsuario extends JFrame {
         });
 
         JPanel inputPanel = new JPanel();
-        inputPanel.setLayout(new GridLayout(8, 2));
-        inputPanel.add(new JLabel("Nombre"));
-        inputPanel.add(nombreField);
-        inputPanel.add(new JLabel("Fecha de Inicio"));
-        inputPanel.add(fechaInicioField);
-        inputPanel.add(new JLabel("Fecha de Fin"));
-        inputPanel.add(fechaFinField);
-        inputPanel.add(new JLabel("Categoría"));
-        inputPanel.add(categoriaField);
-        inputPanel.add(new JLabel("Enlace al Archivo"));
-        inputPanel.add(enlaceField);
-        inputPanel.add(new JLabel("Prioridad"));
-        inputPanel.add(prioridadField);
-        inputPanel.add(agregarBoton);
-        inputPanel.add(editarBoton);
-        inputPanel.add(eliminarBoton);
+        inputPanel.setLayout(new BoxLayout(inputPanel, BoxLayout.Y_AXIS));
+        inputPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        inputPanel.add(createInputField("Nombre", nombreField));
+        inputPanel.add(createInputField("Fecha de Inicio", fechaInicioField));
+        inputPanel.add(createInputField("Fecha de Fin", fechaFinField));
+        inputPanel.add(createInputField("Categoría", categoriaField));
+        inputPanel.add(createInputField("Enlace al Archivo", enlaceField));
+        inputPanel.add(createInputField("Prioridad", prioridadField));
+
+        JPanel buttonPanel = new JPanel(new GridLayout(1, 3, 5, 5));
+        buttonPanel.add(agregarBoton);
+        buttonPanel.add(editarBoton);
+        buttonPanel.add(eliminarBoton);
+
+        inputPanel.add(Box.createVerticalStrut(10));
+        inputPanel.add(buttonPanel);
 
         add(inputPanel, BorderLayout.NORTH);
-        add(listScroller, BorderLayout.CENTER);
+        add(scrollPane, BorderLayout.CENTER);
     }
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                new InterfazUsuario().setVisible(true);
-            }
-        });
+    private JPanel createInputField(String label, JTextField textField) {
+        JPanel panel = new JPanel();
+        panel.setLayout(new FlowLayout(FlowLayout.LEFT));
+        panel.add(new JLabel(label));
+        panel.add(textField);
+        return panel;
+    }
+
+    private void agregarTarea() {
+        String nombre = nombreField.getText();
+        String fechaInicio = fechaInicioField.getText();
+        String fechaFin = fechaFinField.getText();
+        String categoria = categoriaField.getText();
+        String enlace = enlaceField.getText();
+        String prioridad = prioridadField.getText();
+
+        if (nombre.isEmpty() || fechaInicio.isEmpty() || fechaFin.isEmpty() || categoria.isEmpty() || enlace.isEmpty() || prioridad.isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Por favor completa todos los campos.");
+            return;
+        }
+
+        try {
+            Tarea tarea = new Tarea(
+                    nombre,
+                    dateFormat.parse(fechaInicio),
+                    dateFormat.parse(fechaFin),
+                    categoria,
+                    enlace,
+                    prioridad
+            );
+            gestor.agregarTarea(tarea);
+            tableModel.addTask(tarea);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Error en el formato de fecha. Use dd/MM/yyyy.");
+        }
     }
 }

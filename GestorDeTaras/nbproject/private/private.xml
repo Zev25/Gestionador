@@ -3,9 +3,12 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/Felipe/Desktop/Organizador%20de%20archivos/GestorDeTareas/GestorDeTaras/src/modelo/Tarea.java</file>
-            <file>file:/C:/Users/Felipe/Desktop/Organizador%20de%20archivos/GestorDeTareas/GestorDeTaras/src/gestordetaras/ClaseMain.java</file>
-            <file>file:/C:/Users/Felipe/Desktop/Organizador%20de%20archivos/GestorDeTareas/GestorDeTaras/src/vista/InterfazUsuario.java</file>
+            <file>file:/C:/Users/Felipe/Desktop/Organizador%20de%20archivos/Gestionador/GestorDeTaras/src/vista/MenuInicial.java</file>
+            <file>file:/C:/Users/Felipe/Desktop/Organizador%20de%20archivos/Gestionador/GestorDeTaras/src/vista/TaskTableModel.java</file>
+            <file>file:/C:/Users/Felipe/Desktop/Organizador%20de%20archivos/Gestionador/GestorDeTaras/src/controlador/TareaControlador.java</file>
+            <file>file:/C:/Users/Felipe/Desktop/Organizador%20de%20archivos/Gestionador/GestorDeTaras/src/gestordetaras/ClaseMain.java</file>
+            <file>file:/C:/Users/Felipe/Desktop/Organizador%20de%20archivos/Gestionador/GestorDeTaras/src/modelo/Tarea.java</file>
+            <file>file:/C:/Users/Felipe/Desktop/Organizador%20de%20archivos/Gestionador/GestorDeTaras/src/vista/InterfazUsuario.java</file>
         </group>
     </open-files>
 </project-private>
