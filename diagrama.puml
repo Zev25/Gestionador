@@ -1,0 +1,33 @@
+@startuml
+
+class tarea {
+    +String nombre
+    +Date fechaInicio
+    +Date fechaFin
+    +String Categoria
+    +String enlaceArchivo
+    +guardarEnArchivo
+    +cargarDesdeArchivo
+}
+
+class GestorDeTarea{
+    -List~Tarea~ listaTarea
+    +agregarTarea(Tarea tarea)
+    +eliminarTarea(Tarea tarea)
+    +guardarTarea
+    +cargarTareas
+}
+
+class InterfazUsuario{
+    +mostrarListaTarea()
+    +agregarTarea()
+    +eliminarTarea()
+    +visualizarTarea(Tarea tarea)
+}
+
+tarea -- GestorDeTarea : contiene
+GestorDeTarea -- InterfazUsuario : interactúa
+InterfazUsuario -- tarea : muestra 
+
+
+@enduml
