@@ -16,18 +16,30 @@ public class MenuInicial extends JFrame {
         setSize(400, 300);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(null);
+        
 
-        JButton gestionarTareasButton = new JButton("Gestionar Tareas");
-        gestionarTareasButton.setBounds(100, 100, 200, 50);
-        gestionarTareasButton.addActionListener(new ActionListener() {
+        JButton BotonGestionarTareas = new JButton("Gestionar Tareas");
+        BotonGestionarTareas.setBounds(100, 60, 200, 50);
+        BotonGestionarTareas.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 new InterfazUsuario().setVisible(true);
                 dispose(); // Cierra el menú inicial
             }
         });
+        
+        JButton BotonHistorial = new JButton("Historial Tareas");
+        BotonHistorial.setBounds(100, 170, 200, 50);
+        BotonHistorial.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                new MenuHistorial().setVisible(true);
+                dispose();
+        }
+        });
 
-        add(gestionarTareasButton);
+        add(BotonGestionarTareas);
+        add(BotonHistorial);
     }
 
     public static void main(String[] args) {
