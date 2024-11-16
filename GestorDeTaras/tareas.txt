@@ -1,1 +1,2 @@
-Win11;12/11/2024;13/11/2024;instalar;https://estudiantes.ceibal.edu.uy/;Alta
+Win11;12/11/2024;13/11/2024;instalar;https://estudiantes.ceibal.edu.uy/;Alta;
+Win11;12/11/2024;13/11/2024;i;https://estudiantes.ceibal.edu.uy/;Alta; Es un video de ejemplo de como funciona 

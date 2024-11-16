@@ -1,5 +1,6 @@
 package vista;
 
+import controlador.Notificaciones;
 import modelo.Tarea;
 import controlador.TareaControlador;
 
@@ -14,6 +15,7 @@ import java.text.SimpleDateFormat;
 
 public class InterfazUsuario extends JFrame {
     private TareaControlador controlador;
+    private Notificaciones notificaciones;
     private TaskTableModel tableModel;
     private JTable taskTable;
     private JTextField nombreField;
@@ -27,6 +29,7 @@ public class InterfazUsuario extends JFrame {
 
     public InterfazUsuario() {
         controlador = new TareaControlador();
+        notificaciones = new Notificaciones(controlador);
         dateFormat = new SimpleDateFormat("dd/MM/yyyy");
 
         setTitle("Gestor de Tareas");
@@ -50,9 +53,9 @@ public class InterfazUsuario extends JFrame {
         comentariosArea = new JTextArea(3, 15);
         comentariosArea.setLineWrap(true);
         comentariosArea.setWrapStyleWord(true);
-        comentariosArea.setPreferredSize(new Dimension(400, 100)); // Ajuste inicial de tamaño
+        comentariosArea.setPreferredSize(new Dimension(400, 100));
         JScrollPane comentariosScrollPane = new JScrollPane(comentariosArea);
-        comentariosScrollPane.setPreferredSize(new Dimension(400, 100)); // Permite redimensionar
+        comentariosScrollPane.setPreferredSize(new Dimension(400, 100));
 
         JButton agregarBoton = new JButton("Agregar Tarea");
         agregarBoton.setBackground(new Color(34, 139, 34));
@@ -183,6 +186,9 @@ public class InterfazUsuario extends JFrame {
         add(inputPanel, BorderLayout.NORTH);
         add(scrollPane, BorderLayout.CENTER);
         add(volverPanel, BorderLayout.SOUTH);
+
+        // Llamar a método para mostrar notificaciones al iniciar
+        notificaciones.mostrarNotificaciones();
     }
 
     private JPanel createInputField(String label, Component component) {

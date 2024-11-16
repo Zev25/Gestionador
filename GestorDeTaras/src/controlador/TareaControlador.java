@@ -5,6 +5,7 @@ import modelo.Tarea;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -54,5 +55,19 @@ public class TareaControlador {
 
     public void eliminarTarea(Tarea tarea) {
         gestor.eliminarTarea(tarea);
+    }
+
+    public List<Tarea> obtenerTareasProximasAFinalizar() {
+        List<Tarea> todasLasTareas = obtenerTareas();
+        List<Tarea> tareasProximas = new ArrayList<>();
+        Date hoy = new Date();
+        long diezDiasEnMilisegundos = 10L * 24 * 60 * 60 * 1000; // 10 días en milisegundos
+
+        for (Tarea tarea : todasLasTareas) {
+            if (tarea.getFechaFin().getTime() - hoy.getTime() <= diezDiasEnMilisegundos) {
+                tareasProximas.add(tarea);
+            }
+        }
+        return tareasProximas;
     }
 }

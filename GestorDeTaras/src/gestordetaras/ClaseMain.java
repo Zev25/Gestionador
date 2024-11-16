@@ -1,6 +1,7 @@
 package gestordetaras;
 
 import vista.MenuInicial;
+
 /**
  *
  * @author Felipe
