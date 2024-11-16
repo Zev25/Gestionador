@@ -1,7 +1,7 @@
 package vista;
 
-import modelo.GestorDeTarea;
 import modelo.Tarea;
+import controlador.TareaControlador;
 
 import javax.swing.*;
 import java.awt.*;
@@ -12,13 +12,8 @@ import java.awt.event.MouseEvent;
 import java.net.URI;
 import java.text.SimpleDateFormat;
 
-/**
- *
- * @author Felipe
- */
-
 public class InterfazUsuario extends JFrame {
-    private GestorDeTarea gestor;
+    private TareaControlador controlador;
     private TaskTableModel tableModel;
     private JTable taskTable;
     private JTextField nombreField;
@@ -27,15 +22,15 @@ public class InterfazUsuario extends JFrame {
     private JTextField categoriaField;
     private JTextField enlaceField;
     private JTextField prioridadField;
+    private JTextArea comentariosArea;
     private SimpleDateFormat dateFormat;
 
     public InterfazUsuario() {
-        gestor = new GestorDeTarea();
-        gestor.cargarTarea();
+        controlador = new TareaControlador();
         dateFormat = new SimpleDateFormat("dd/MM/yyyy");
 
         setTitle("Gestor de Tareas");
-        setSize(800, 500);
+        setSize(800, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 
@@ -44,7 +39,7 @@ public class InterfazUsuario extends JFrame {
         taskTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         JScrollPane scrollPane = new JScrollPane(taskTable);
 
-        tableModel.addTasks(gestor.getListaTarea());
+        tableModel.addTasks(controlador.obtenerTareas());
 
         nombreField = new JTextField(15);
         fechaInicioField = new JTextField(15);
@@ -52,42 +47,28 @@ public class InterfazUsuario extends JFrame {
         categoriaField = new JTextField(15);
         enlaceField = new JTextField(15);
         prioridadField = new JTextField(15);
+        comentariosArea = new JTextArea(3, 15);
+        comentariosArea.setLineWrap(true);
+        comentariosArea.setWrapStyleWord(true);
+        comentariosArea.setPreferredSize(new Dimension(400, 100)); // Ajuste inicial de tamaño
+        JScrollPane comentariosScrollPane = new JScrollPane(comentariosArea);
+        comentariosScrollPane.setPreferredSize(new Dimension(400, 100)); // Permite redimensionar
 
         JButton agregarBoton = new JButton("Agregar Tarea");
+        agregarBoton.setBackground(new Color(34, 139, 34));
+        agregarBoton.setForeground(Color.WHITE);
+        agregarBoton.setFont(new Font("Arial", Font.BOLD, 12));
         agregarBoton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String nombre = nombreField.getText();
-                String fechaInicio = fechaInicioField.getText();
-                String fechaFin = fechaFinField.getText();
-                String categoria = categoriaField.getText();
-                String enlace = enlaceField.getText();
-                String prioridad = prioridadField.getText();
-
-                if (nombre.isEmpty() || fechaInicio.isEmpty() || fechaFin.isEmpty() || categoria.isEmpty() || enlace.isEmpty() || prioridad.isEmpty()) {
-                    JOptionPane.showMessageDialog(null, "Por favor completa todos los campos.");
-                    return;
-                }
-
-                try {
-                    Tarea tarea = new Tarea(
-                            nombre,
-                            dateFormat.parse(fechaInicio),
-                            dateFormat.parse(fechaFin),
-                            categoria,
-                            enlace,
-                            prioridad
-                    );
-                    gestor.agregarTarea(tarea);
-                    tableModel.addTask(tarea);
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                    JOptionPane.showMessageDialog(null, "Error en el formato de fecha. Use dd/MM/yyyy.");
-                }
+                agregarTarea();
             }
         });
 
         JButton editarBoton = new JButton("Editar Tarea");
+        editarBoton.setBackground(new Color(255, 165, 0));
+        editarBoton.setForeground(Color.WHITE);
+        editarBoton.setFont(new Font("Arial", Font.BOLD, 12));
         editarBoton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -101,28 +82,24 @@ public class InterfazUsuario extends JFrame {
                     categoriaField.setText(tareaSeleccionada.getCategoria());
                     enlaceField.setText(tareaSeleccionada.getEnlaceArchivo());
                     prioridadField.setText(tareaSeleccionada.getPrioridad());
+                    comentariosArea.setText(tareaSeleccionada.getComentarios());
 
                     agregarBoton.setText("Actualizar Tarea");
                     agregarBoton.addActionListener(new ActionListener() {
                         @Override
                         public void actionPerformed(ActionEvent e) {
                             try {
-                                tareaSeleccionada.setNombre(nombreField.getText());
-                                tareaSeleccionada.setFechaInicio(dateFormat.parse(fechaInicioField.getText()));
-                                tareaSeleccionada.setFechaFin(dateFormat.parse(fechaFinField.getText()));
-                                tareaSeleccionada.setCategoria(categoriaField.getText());
-                                tareaSeleccionada.setEnlaceArchivo(enlaceField.getText());
-                                tareaSeleccionada.setPrioridad(prioridadField.getText());
+                                controlador.editarTarea(tareaSeleccionada,
+                                    nombreField.getText(),
+                                    fechaInicioField.getText(),
+                                    fechaFinField.getText(),
+                                    categoriaField.getText(),
+                                    enlaceField.getText(),
+                                    prioridadField.getText(),
+                                    comentariosArea.getText());
 
-                                gestor.guardarTarea();
                                 tableModel.updateTask(selectedRow, tareaSeleccionada);
                                 agregarBoton.setText("Agregar Tarea");
-                                agregarBoton.addActionListener(new ActionListener() {
-                                    @Override
-                                    public void actionPerformed(ActionEvent e) {
-                                        agregarTarea();
-                                    }
-                                });
                             } catch (Exception ex) {
                                 ex.printStackTrace();
                                 JOptionPane.showMessageDialog(null, "Error en el formato de fecha. Use dd/MM/yyyy.");
@@ -136,16 +113,31 @@ public class InterfazUsuario extends JFrame {
         });
 
         JButton eliminarBoton = new JButton("Eliminar Tarea");
+        eliminarBoton.setBackground(new Color(178, 34, 34));
+        eliminarBoton.setForeground(Color.WHITE);
+        eliminarBoton.setFont(new Font("Arial", Font.BOLD, 12));
         eliminarBoton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 int selectedRow = taskTable.getSelectedRow();
                 if (selectedRow != -1) {
-                    gestor.eliminarTarea(tableModel.getTaskAt(selectedRow));
+                    controlador.eliminarTarea(tableModel.getTaskAt(selectedRow));
                     tableModel.removeTask(selectedRow);
                 } else {
                     JOptionPane.showMessageDialog(null, "Por favor selecciona una tarea para eliminar.");
                 }
+            }
+        });
+
+        JButton volverBoton = new JButton("Volver al Menú Inicial");
+        volverBoton.setBackground(new Color(70, 130, 180));
+        volverBoton.setForeground(Color.WHITE);
+        volverBoton.setFont(new Font("Arial", Font.BOLD, 12));
+        volverBoton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                new MenuInicial().setVisible(true);
+                dispose();
             }
         });
 
@@ -175,24 +167,29 @@ public class InterfazUsuario extends JFrame {
         inputPanel.add(createInputField("Categoría", categoriaField));
         inputPanel.add(createInputField("Enlace al Archivo", enlaceField));
         inputPanel.add(createInputField("Prioridad", prioridadField));
+        inputPanel.add(createInputField("Comentarios", comentariosScrollPane));
 
         JPanel buttonPanel = new JPanel(new GridLayout(1, 3, 5, 5));
         buttonPanel.add(agregarBoton);
         buttonPanel.add(editarBoton);
         buttonPanel.add(eliminarBoton);
 
+        JPanel volverPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        volverPanel.add(volverBoton);
+
         inputPanel.add(Box.createVerticalStrut(10));
         inputPanel.add(buttonPanel);
 
         add(inputPanel, BorderLayout.NORTH);
         add(scrollPane, BorderLayout.CENTER);
+        add(volverPanel, BorderLayout.SOUTH);
     }
 
-    private JPanel createInputField(String label, JTextField textField) {
+    private JPanel createInputField(String label, Component component) {
         JPanel panel = new JPanel();
         panel.setLayout(new FlowLayout(FlowLayout.LEFT));
         panel.add(new JLabel(label));
-        panel.add(textField);
+        panel.add(component);
         return panel;
     }
 
@@ -203,23 +200,16 @@ public class InterfazUsuario extends JFrame {
         String categoria = categoriaField.getText();
         String enlace = enlaceField.getText();
         String prioridad = prioridadField.getText();
+        String comentarios = comentariosArea.getText();
 
-        if (nombre.isEmpty() || fechaInicio.isEmpty() || fechaFin.isEmpty() || categoria.isEmpty() || enlace.isEmpty() || prioridad.isEmpty()) {
+        if (nombre.isEmpty() || fechaInicio.isEmpty() || fechaFin.isEmpty() || categoria.isEmpty() || enlace.isEmpty() || prioridad.isEmpty() || comentarios.isEmpty()) {
             JOptionPane.showMessageDialog(null, "Por favor completa todos los campos.");
             return;
         }
 
         try {
-            Tarea tarea = new Tarea(
-                    nombre,
-                    dateFormat.parse(fechaInicio),
-                    dateFormat.parse(fechaFin),
-                    categoria,
-                    enlace,
-                    prioridad
-            );
-            gestor.agregarTarea(tarea);
-            tableModel.addTask(tarea);
+            controlador.agregarTarea(nombre, fechaInicio, fechaFin, categoria, enlace, prioridad, comentarios);
+            tableModel.addTask(new Tarea(nombre, dateFormat.parse(fechaInicio), dateFormat.parse(fechaFin), categoria, enlace, prioridad, comentarios));
         } catch (Exception ex) {
             ex.printStackTrace();
             JOptionPane.showMessageDialog(null, "Error en el formato de fecha. Use dd/MM/yyyy.");

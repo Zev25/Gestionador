@@ -8,8 +8,6 @@ import java.awt.event.ActionListener;
  *
  * @author Felipe
  */
-
-
 public class MenuInicial extends JFrame {
     public MenuInicial() {
         setTitle("Menú Inicial");
