@@ -1,33 +1,81 @@
 @startuml
-
-class tarea {
-    +String nombre
-    +Date fechaInicio
-    +Date fechaFin
-    +String Categoria
-    +String enlaceArchivo
-    +guardarEnArchivo
-    +cargarDesdeArchivo
+class InterfazUsuario {
+    - TareaControlador controlador
+    - Notificaciones notificaciones
+    - TaskTableModel tableModel
+    - JTable taskTable
+    - JTextField nombreField
+    - JTextField fechaInicioField
+    - JTextField fechaFinField
+    - JTextField categoriaField
+    - JTextField enlaceField
+    - JTextField prioridadField
+    - JTextArea comentariosArea
+    - SimpleDateFormat dateFormat
+    + InterfazUsuario()
+    + agregarTarea()
+    + createInputField(String label, Component component)
 }
 
-class GestorDeTarea{
-    -List~Tarea~ listaTarea
-    +agregarTarea(Tarea tarea)
-    +eliminarTarea(Tarea tarea)
-    +guardarTarea
-    +cargarTareas
+class TareaControlador {
+    - GestorDeTarea gestor
+    - SimpleDateFormat dateFormat
+    + TareaControlador()
+    + List<Tarea> obtenerTareas()
+    + boolean agregarTarea(String nombre, String fechaInicio, String fechaFin, String categoria, String enlace, String prioridad, String comentarios)
+    + boolean editarTarea(Tarea tarea, String nombre, String fechaInicio, String fechaFin, String categoria, String enlace, String prioridad, String comentarios)
+    + void eliminarTarea(Tarea tarea)
+    + List<Tarea> obtenerTareasProximasAFinalizar()
 }
 
-class InterfazUsuario{
-    +mostrarListaTarea()
-    +agregarTarea()
-    +eliminarTarea()
-    +visualizarTarea(Tarea tarea)
+class Notificaciones {
+    - TareaControlador controlador
+    - SimpleDateFormat dateFormat
+    + Notificaciones(TareaControlador controlador)
+    + void mostrarNotificaciones()
 }
 
-tarea -- GestorDeTarea : contiene
-GestorDeTarea -- InterfazUsuario : interactúa
-InterfazUsuario -- tarea : muestra 
+class Tarea {
+    - String nombre
+    - Date fechaInicio
+    - Date fechaFin
+    - String categoria
+    - String enlaceArchivo
+    - String prioridad
+    - String comentarios
+    - static SimpleDateFormat DATE_FORMAT
+    + Tarea(String nombre, Date fechaInicio, Date fechaFin, String categoria, String enlaceArchivo, String prioridad, String comentarios)
+    + String getNombre()
+    + void setNombre(String nombre)
+    + Date getFechaInicio()
+    + void setFechaInicio(Date fechaInicio)
+    + Date getFechaFin()
+    + void setFechaFin(Date fechaFin)
+    + String getCategoria()
+    + void setCategoria(String categoria)
+    + String getEnlaceArchivo()
+    + void setEnlaceArchivo(String enlaceArchivo)
+    + String getPrioridad()
+    + void setPrioridad(String prioridad)
+    + String getComentarios()
+    + void setComentarios(String comentarios)
+    + String toString()
+    + static Tarea fromString(String tareaStr)
+}
 
+class GestorDeTarea {
+    + void cargarTarea()
+    + void guardarTarea()
+    + void agregarTarea(Tarea tarea)
+    + void eliminarTarea(Tarea tarea)
+    + List<Tarea> getListaTarea()
+}
 
+InterfazUsuario --> TareaControlador
+InterfazUsuario --> Notificaciones
+InterfazUsuario --> TaskTableModel
+TareaControlador --> GestorDeTarea
+Notificaciones --> TareaControlador
+TareaControlador --> Tarea
+GestorDeTarea --> Tarea
 @enduml
